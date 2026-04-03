@@ -1,52 +1,65 @@
 # Backend Modular Mockup
 
-This folder is a practical mockup of a modular backend structure.  
-It is intentionally lightweight, but it already shows the patterns we want to keep: module boundaries, validated inputs, consistent API responses, and centralized middleware/logging.
+This server is a **mock API** for local development. **All responses use in-memory fake data** — there is no database connection and nothing is persisted across restarts (except what you hold in memory during a single process).
 
-## Middlewares
+## Quick start
 
-Inside `src/shared/middleware`:
+From this directory:
 
-- `validateMiddleware.ts`: validates body/query/params (and headers when needed) with Zod.
-- `requestLoggerMiddleware.ts`: request/response logging hook.
-- `notFoundMiddleware.ts`: standard 404 response.
-- `errorMiddleware.ts`: centralized error mapping and API error envelope.
+```bash
+npm install
+npm run dev
+```
 
-Together, these middlewares enforce a clean request lifecycle at the edge of the app.
+The HTTP server listens on **port 8090** by default (see `src/config/env.ts`: `PORT` defaults to `8090`).
 
-## Database layer note
+### Set the port explicitly (8090)
 
-The DB layer is designed to be swappable depending on what we choose in production.  
-In this mockup, we use **Prisma + PostgreSQL** as the concrete example:
+Create a `.env` file next to `package.json` (you can copy `.env.example`):
 
-- Prisma schema: `prisma/schema.prisma`
-- DB client: `src/infrastructure/db/client.ts`
-- Repository integration: `src/modules/*/*.repository.ts` (all module repositories are Prisma-backed in this mockup)
+```bash
+cp .env.example .env
+```
 
-## Models module walkthrough
+Ensure it contains:
 
-To make the structure concrete, here is how `src/modules/models` is split:
+```env
+PORT=8090
+FRONTEND_URL=http://localhost:5173
+```
 
-- `index.ts`  
-  Public entrypoint for the module (exports router).
+Or start with an environment variable:
 
-- `models.routes.ts`  
-  Defines HTTP routes and applies middleware in order:
-  validation -> async handler -> controller.
+```bash
+PORT=8090 npm run dev
+```
 
-- `models.schemas.ts`  
-  Zod schemas for request input (`query` and `params`) plus inferred TS types.
+### Point the Mentonex frontend at this API
 
-- `models.controller.ts`  
-  HTTP layer only. Reads validated input, calls the service, returns standardized responses.
+The Vite app calls `VITE_API_BASE_URL` + `/api/...`. In the **frontend** repo, set (for example in `frontend/.env` or `frontend/.env.local`):
 
-- `models.service.ts`  
-  Business rules and filtering logic. Handles domain errors (for example "model not found").
+```env
+VITE_API_BASE_URL=http://localhost:8090
+```
 
-- `models.repository.ts`  
-  Data access boundary. Today it uses an in-memory source for the mockup, but this is where DB-backed logic lives.
+Restart the Vite dev server after changing env vars.
 
-- `models.types.ts`  
-  Domain data shape used by the module.
+Health check: `GET http://localhost:8090/api/health` — the JSON includes `mock: true`.
 
-This same pattern is repeated across the rest of the modules so the codebase stays predictable as it grows.
+## Architecture notes
+
+- **Middlewares** (`src/shared/middleware`): validation (Zod), request logging, 404, error handling.
+- **Modules** (`src/modules/*`): each feature exposes routes → controller → service → **in-memory** repository (see comments marked `MOCK` in repository and service files).
+- **`src/infrastructure/db/client.ts`**: stub only; real Prisma usage is not active in this mock mode.
+
+For a deeper tour of the models module layout (routes, schemas, controller, service, types), see the older sections below if still useful; treat the **database layer** description as superseded by the mock-only note above.
+
+## Models module layout (reference)
+
+- `index.ts` — public router export.
+- `models.routes.ts` — HTTP routes and middleware chain.
+- `models.schemas.ts` — Zod request schemas.
+- `models.controller.ts` — HTTP layer.
+- `models.service.ts` — business rules; provider/active LLM state is in-memory.
+- `models.repository.ts` — legacy `ModelSummary` mock rows (no DB).
+- `models.types.ts` — TypeScript types.
