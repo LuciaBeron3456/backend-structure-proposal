@@ -34,7 +34,6 @@ export function createApp() {
   );
 
   app.use(morgan("combined"));
-  app.use(requestLoggerMiddleware);
   app.use(express.json({ limit: "10mb" }));
   app.use(express.urlencoded({ extended: true }));
   app.use("/api", apiRouter);
