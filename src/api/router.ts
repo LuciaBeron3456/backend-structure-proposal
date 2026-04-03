@@ -10,12 +10,15 @@ import { chatsRouter } from "../modules/chats";
 import { consoleRouter } from "../modules/console";
 import { agentRouter } from "../modules/agent";
 import { filesRouter } from "../modules/files";
+import { miscRouter } from "../modules/misc";
 import { ok } from "../shared/utils/response";
 
 /**
  * MOCK API: routes aligned with `frontend/src/api/modules/*` (no DB).
  */
 export const apiRouter = Router();
+
+apiRouter.use("/", miscRouter);
 
 apiRouter.use("/auth", authRouter);
 apiRouter.use("/agents", agentsRouter);

@@ -12,7 +12,7 @@ import {
   weixinQrcodeController,
   weixinQrcodeStatusController,
 } from "./config.controller";
-import { ok } from "../../shared/utils/response";
+import { securityRouter } from "./security.routes";
 
 /**
  * MOCK: `/config/*` routes consumed by the Mentonex frontend (`channelApi`, etc.).
@@ -33,9 +33,4 @@ configRouter.put("/heartbeat", putHeartbeatController);
 configRouter.get("/user-timezone", getUserTimezoneController);
 configRouter.put("/user-timezone", putUserTimezoneController);
 
-/** MOCK: catch-all for `/config/security/*` (Settings → Security). Must be registered last. */
-const securityStub = Router();
-securityStub.use((_req, res) => {
-  return ok(res, { mock: true });
-});
-configRouter.use("/security", securityStub);
+configRouter.use("/security", securityRouter);
