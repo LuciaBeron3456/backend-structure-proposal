@@ -1,16 +1,6 @@
-import { PrismaClient } from "./generated/client";
-
-declare global {
-  // eslint-disable-next-line no-var
-  var __prisma: PrismaClient | undefined;
-}
-
-export const dbClient =
-  globalThis.__prisma ??
-  new PrismaClient({
-    log: process.env.NODE_ENV === "development" ? ["query", "warn", "error"] : ["error"]
-  });
-
-if (process.env.NODE_ENV !== "production") {
-  globalThis.__prisma = dbClient;
-}
+/**
+ * MOCK-ONLY BACKEND: No Prisma / database connection.
+ * All API data comes from in-memory stores in module repository files.
+ * This export exists only to satisfy legacy imports; do not use for new code.
+ */
+export const dbClient = null as never;

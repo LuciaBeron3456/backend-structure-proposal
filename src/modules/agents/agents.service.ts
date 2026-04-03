@@ -1,6 +1,7 @@
 import { AgentsRepository } from "./agents.repository";
 import { AppError } from "../../shared/errors/AppError";
 
+/** MOCK: data from in-memory AgentsRepository (no DB). */
 export class AgentsService {
   constructor(private readonly repository = new AgentsRepository()) {}
 

@@ -1,18 +1,19 @@
 import type { SkillSummary } from "./skills.types";
-import { dbClient } from "../../infrastructure/db/client";
+
+/**
+ * MOCK DATA: static skills (no DB).
+ */
+const mockSkills: SkillSummary[] = [
+  { name: "example-skill", enabled: true },
+  { name: "mock-tool-skill", enabled: false },
+];
 
 export class SkillsRepository {
   async list(): Promise<SkillSummary[]> {
-    return dbClient.skill.findMany({
-      select: { name: true, enabled: true },
-      orderBy: { createdAt: "asc" }
-    });
+    return [...mockSkills];
   }
 
   async getByName(name: string): Promise<SkillSummary | null> {
-    return dbClient.skill.findUnique({
-      where: { name },
-      select: { name: true, enabled: true }
-    });
+    return mockSkills.find((s) => s.name === name) ?? null;
   }
 }

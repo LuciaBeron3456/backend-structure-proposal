@@ -1,20 +1,19 @@
 import type { AgentSummary } from "./agents.types";
-import { dbClient } from "../../infrastructure/db/client";
+
+/**
+ * MOCK DATA: fixed agents only (no DB).
+ */
+const mockAgents: AgentSummary[] = [
+  { id: "default", name: "Default Agent", enabled: true },
+  { id: "research", name: "Research Agent", enabled: true },
+];
 
 export class AgentsRepository {
   async list(): Promise<AgentSummary[]> {
-    const rows = await dbClient.agent.findMany({
-      select: { id: true, name: true, enabled: true },
-      orderBy: { createdAt: "asc" }
-    });
-    return rows;
+    return [...mockAgents];
   }
 
   async getById(id: string): Promise<AgentSummary | null> {
-    const row = await dbClient.agent.findUnique({
-      where: { id },
-      select: { id: true, name: true, enabled: true }
-    });
-    return row;
+    return mockAgents.find((a) => a.id === id) ?? null;
   }
 }

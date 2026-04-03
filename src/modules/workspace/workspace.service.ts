@@ -1,6 +1,7 @@
 import { WorkspaceRepository } from "./workspace.repository";
 import { AppError } from "../../shared/errors/AppError";
 
+/** MOCK: data from in-memory WorkspaceRepository (no DB). */
 export class WorkspaceService {
   constructor(private readonly repository = new WorkspaceRepository()) {}
 

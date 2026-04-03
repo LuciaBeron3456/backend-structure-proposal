@@ -1,6 +1,7 @@
 import { McpRepository } from "./mcp.repository";
 import { AppError } from "../../shared/errors/AppError";
 
+/** MOCK: data from in-memory McpRepository (no DB). */
 export class McpService {
   constructor(private readonly repository = new McpRepository()) {}
 

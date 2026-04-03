@@ -1,18 +1,19 @@
 import type { WorkspaceFileSummary } from "./workspace.types";
-import { dbClient } from "../../infrastructure/db/client";
+
+/**
+ * MOCK DATA: static workspace files (no DB).
+ */
+const mockFiles: WorkspaceFileSummary[] = [
+  { filename: "README.md", size: 120 },
+  { filename: "notes.txt", size: 42 },
+];
 
 export class WorkspaceRepository {
   async listFiles(): Promise<WorkspaceFileSummary[]> {
-    return dbClient.workspaceFile.findMany({
-      select: { filename: true, size: true },
-      orderBy: { createdAt: "asc" }
-    });
+    return [...mockFiles];
   }
 
   async getByFilename(filename: string): Promise<WorkspaceFileSummary | null> {
-    return dbClient.workspaceFile.findUnique({
-      where: { filename },
-      select: { filename: true, size: true }
-    });
+    return mockFiles.find((f) => f.filename === filename) ?? null;
   }
 }

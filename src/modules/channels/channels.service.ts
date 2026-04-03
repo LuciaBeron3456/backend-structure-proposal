@@ -2,6 +2,7 @@ import { ChannelsRepository } from "./channels.repository";
 import { AppError } from "../../shared/errors/AppError";
 import type { CreateChannelInput } from "./channels.types";
 
+/** MOCK: data from in-memory ChannelsRepository (no DB). */
 export class ChannelsService {
   constructor(private readonly repository = new ChannelsRepository()) {}
 

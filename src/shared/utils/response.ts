@@ -1,16 +1,23 @@
 import type { Response } from "express";
-import type { ApiErrorBody, ApiSuccess } from "../types/apiResponse";
 
-export function ok<T>(res: Response, data: T, meta?: Record<string, unknown>) {
-  const body: ApiSuccess<T> = meta ? { success: true, data, meta } : { success: true, data };
-  return res.status(200).json(body);
+/**
+ * Success responses: send the payload as the JSON body (CoPaw / Mentonex frontend
+ * expects raw objects/arrays, not `{ success, data }` wrappers).
+ *
+ * @param _meta Optional metadata (ignored for API parity; callers may omit it).
+ */
+export function ok<T>(res: Response, data: T, _meta?: Record<string, unknown>) {
+  return res.status(200).json(data);
 }
 
-export function created<T>(res: Response, data: T, meta?: Record<string, unknown>) {
-  const body: ApiSuccess<T> = meta ? { success: true, data, meta } : { success: true, data };
-  return res.status(201).json(body);
+export function created<T>(res: Response, data: T, _meta?: Record<string, unknown>) {
+  return res.status(201).json(data);
 }
 
+/**
+ * Error responses: FastAPI-style `detail` plus `code` for debugging.
+ * The frontend auth layer reads `detail` on failed login/register.
+ */
 export function fail(
   res: Response,
   statusCode: number,
@@ -18,9 +25,10 @@ export function fail(
   message: string,
   details?: unknown
 ) {
-  const body: ApiErrorBody = {
-    success: false,
-    error: { code, message, details }
+  const body: Record<string, unknown> = {
+    detail: message,
+    code,
+    ...(details !== undefined ? { details } : {}),
   };
   return res.status(statusCode).json(body);
 }

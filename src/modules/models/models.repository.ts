@@ -1,18 +1,20 @@
 import type { ModelSummary } from "./models.types";
-import { dbClient } from "../../infrastructure/db/client";
+
+/**
+ * MOCK DATA: legacy `ModelSummary` rows for GET /models/:id (no DB).
+ * Provider-style list for the UI comes from ModelsService.listProviders().
+ */
+const mockModels: ModelSummary[] = [
+  { id: "mock-gpt-4o-mini", provider: "mock-openai", enabled: true },
+  { id: "mock-claude", provider: "mock-anthropic", enabled: false },
+];
 
 export class ModelsRepository {
   async list(): Promise<ModelSummary[]> {
-    return dbClient.model.findMany({
-      select: { id: true, provider: true, enabled: true },
-      orderBy: { createdAt: "asc" }
-    });
+    return [...mockModels];
   }
 
   async getById(id: string): Promise<ModelSummary | null> {
-    return dbClient.model.findUnique({
-      where: { id },
-      select: { id: true, provider: true, enabled: true }
-    });
+    return mockModels.find((m) => m.id === id) ?? null;
   }
 }

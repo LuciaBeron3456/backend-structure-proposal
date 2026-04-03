@@ -1,8 +1,16 @@
+/**
+ * MOCK: provider list + active model slots are in-memory (ModelsService); no DB.
+ */
 import type { Response } from "express";
 import type { ValidatedRequest } from "../../shared/types/http";
 import { ModelsService } from "./models.service";
 import { ok } from "../../shared/utils/response";
-import type { ListModelsQuery, ModelParams } from "./models.schemas";
+import type {
+  ActiveModelsQuery,
+  ListModelsQuery,
+  ModelParams,
+  SetActiveModelBody,
+} from "./models.schemas";
 
 const modelsService = new ModelsService();
 
@@ -10,18 +18,24 @@ export async function listModelsController(
   req: ValidatedRequest<unknown, ListModelsQuery>,
   res: Response
 ) {
-  const enabled =
-    req.query.enabled === undefined ? undefined : req.query.enabled === "true";
-  const data = await modelsService.listModels({
-    provider: req.query.provider,
-    enabled
-  });
-  return ok(res, data, {
-    filters: {
-      provider: req.query.provider ?? "all",
-      enabled: enabled ?? "all"
-    }
-  });
+  const data = await modelsService.listProviders();
+  return ok(res, data);
+}
+
+export async function getActiveModelsController(
+  req: ValidatedRequest<unknown, ActiveModelsQuery>,
+  res: Response,
+) {
+  const data = await modelsService.getActiveModels(req.query.scope, req.query.agent_id);
+  return ok(res, data);
+}
+
+export async function setActiveModelsController(
+  req: ValidatedRequest<SetActiveModelBody>,
+  res: Response,
+) {
+  const data = await modelsService.setActiveModels(req.body);
+  return ok(res, data);
 }
 
 export async function getModelByIdController(

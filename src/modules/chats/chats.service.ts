@@ -1,6 +1,7 @@
 import { ChatsRepository } from "./chats.repository";
 import { AppError } from "../../shared/errors/AppError";
 
+/** MOCK: data from in-memory ChatsRepository (no DB). */
 export class ChatsService {
   constructor(private readonly repository = new ChatsRepository()) {}
 

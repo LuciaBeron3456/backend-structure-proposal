@@ -1,18 +1,19 @@
 import type { McpClient } from "./mcp.types";
-import { dbClient } from "../../infrastructure/db/client";
+
+/**
+ * MOCK DATA: static MCP clients (no DB).
+ */
+const mockMcpClients: McpClient[] = [
+  { key: "filesystem", name: "Mock Filesystem MCP", enabled: true },
+  { key: "fetch", name: "Mock Fetch MCP", enabled: false },
+];
 
 export class McpRepository {
   async list(): Promise<McpClient[]> {
-    return dbClient.mcpClient.findMany({
-      select: { key: true, name: true, enabled: true },
-      orderBy: { createdAt: "asc" }
-    });
+    return [...mockMcpClients];
   }
 
   async getByKey(key: string): Promise<McpClient | null> {
-    return dbClient.mcpClient.findUnique({
-      where: { key },
-      select: { key: true, name: true, enabled: true }
-    });
+    return mockMcpClients.find((c) => c.key === key) ?? null;
   }
 }

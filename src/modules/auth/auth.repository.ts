@@ -1,15 +1,16 @@
-import { dbClient } from "../../infrastructure/db/client";
+import type { MockUser } from "./auth.types";
+
+/**
+ * MOCK DATA: in-memory users only (no DB).
+ * Password check is handled in AuthService (`admin` for demo).
+ */
+const mockUsers: MockUser[] = [
+  { id: "u1", username: "admin", passwordHash: "mock" },
+  { id: "u2", username: "demo", passwordHash: "mock" },
+];
 
 export class AuthRepository {
-  async findUserByUsername(username: string) {
-    const user = await dbClient.user.findUnique({
-      where: { username },
-      select: { id: true, username: true, passwordHash: true }
-    });
-    // Keep the mock login experience usable until user provisioning is implemented.
-    if (!user && username === "admin") {
-      return { id: "u1", username: "admin", passwordHash: "mock" };
-    }
-    return user;
+  async findUserByUsername(username: string): Promise<MockUser | null> {
+    return mockUsers.find((u) => u.username === username) ?? null;
   }
 }

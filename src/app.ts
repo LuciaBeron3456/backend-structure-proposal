@@ -8,6 +8,7 @@ import { errorMiddleware } from "./shared/middleware/errorMiddleware";
 import { requestLoggerMiddleware } from "./shared/middleware/requestLoggerMiddleware";
 import { env } from "./config/env";
 
+/** Express app for MOCK API only — all routes use in-memory data (no database). */
 export function createApp() {
   const app = express();
 

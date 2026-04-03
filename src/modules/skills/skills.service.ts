@@ -1,6 +1,7 @@
 import { SkillsRepository } from "./skills.repository";
 import { AppError } from "../../shared/errors/AppError";
 
+/** MOCK: data from in-memory SkillsRepository (no DB). */
 export class SkillsService {
   constructor(private readonly repository = new SkillsRepository()) {}
 
