@@ -1,24 +1,77 @@
 # Backend Modular Mockup
 
-This folder is a scaffold for a domain-driven backend structure.
-It is intentionally minimal and non-production, used for architecture review.
+This folder is a practical mockup of a modular backend structure.  
+It is intentionally lightweight, but it already shows the patterns we want to keep: module boundaries, validated inputs, consistent API responses, and centralized middleware/logging.
 
-## Goals
+## `main.ts` and `app.ts`
 
-- Show module boundaries (`auth`, `agents`, `skills`, `mcp`).
-- Separate app bootstrap from feature logic.
-- Keep shared concerns (`errors`, `middleware`, `logger`) centralized.
-- Make future extraction to microservices easier.
-- Demonstrate runtime request validation with Zod middleware.
+`src/main.ts` is the process entrypoint. It loads environment variables, builds the app, and starts the HTTP server.
 
-## High-level layout
+`src/app.ts` is where Express is assembled. It wires security and transport middleware (`helmet`, `cors`, `morgan`), request parsing, request logging, the `/api` router, and finally not-found and error middleware.  
+Keeping this file focused makes startup behavior easy to reason about.
 
-- `src/main.ts`: process entrypoint.
-- `src/app.ts`: express app wiring.
-- `src/config`: runtime configuration.
-- `src/shared`: cross-domain concerns.
-- `src/infrastructure`: adapters for DB/cache/storage.
-- `src/modules`: domain feature modules.
-- `src/api/router.ts`: API composition point.
-- `src/tests`: placeholder test structure.
-# backend-structure-proposal
+## Shared utils (quick summary)
+
+Inside `src/shared/utils`:
+
+- `asyncHandler.ts`: wraps async controllers so thrown/rejected errors always reach the error middleware.
+- `response.ts`: standard response helpers (`ok`, `created`, `fail`) so all endpoints follow one response shape.
+
+These utilities are there to remove repeated boilerplate and keep behavior consistent across modules.
+
+## Shared types (quick summary)
+
+Inside `src/shared/types`:
+
+- `http.ts`: typed request helper (`ValidatedRequest`) used after schema validation.
+- `apiResponse.ts`: shared response envelope types for success and error payloads.
+
+This gives us stronger type safety without coupling each module to custom local request/response shapes.
+
+## Middlewares
+
+Inside `src/shared/middleware`:
+
+- `validateMiddleware.ts`: validates body/query/params (and headers when needed) with Zod.
+- `requestLoggerMiddleware.ts`: request/response logging hook.
+- `notFoundMiddleware.ts`: standard 404 response.
+- `errorMiddleware.ts`: centralized error mapping and API error envelope.
+
+Together, these middlewares enforce a clean request lifecycle at the edge of the app.
+
+## Database layer note
+
+The DB layer is designed to be swappable depending on what we choose in production.  
+In this mockup, we use **Prisma + PostgreSQL** as the concrete example:
+
+- Prisma schema: `prisma/schema.prisma`
+- DB client: `src/infrastructure/db/client.ts`
+- Repository integration: `src/modules/*/*.repository.ts` (all module repositories are Prisma-backed in this mockup)
+
+## Models module walkthrough
+
+To make the structure concrete, here is how `src/modules/models` is split:
+
+- `index.ts`  
+  Public entrypoint for the module (exports router).
+
+- `models.routes.ts`  
+  Defines HTTP routes and applies middleware in order:
+  validation -> async handler -> controller.
+
+- `models.schemas.ts`  
+  Zod schemas for request input (`query` and `params`) plus inferred TS types.
+
+- `models.controller.ts`  
+  HTTP layer only. Reads validated input, calls the service, returns standardized responses.
+
+- `models.service.ts`  
+  Business rules and filtering logic. Handles domain errors (for example "model not found").
+
+- `models.repository.ts`  
+  Data access boundary. Today it uses an in-memory source for the mockup, but this is where DB-backed logic lives.
+
+- `models.types.ts`  
+  Domain data shape used by the module.
+
+This same pattern is repeated across the rest of the modules so the codebase stays predictable as it grows.
