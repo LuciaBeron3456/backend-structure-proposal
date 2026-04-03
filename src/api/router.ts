@@ -4,14 +4,16 @@ import { agentsRouter } from "../modules/agents";
 import { skillsRouter } from "../modules/skills";
 import { mcpRouter } from "../modules/mcp";
 import { modelsRouter } from "../modules/models";
-import { channelsRouter } from "../modules/channels";
+import { configRouter } from "../modules/config";
 import { workspaceRouter } from "../modules/workspace";
 import { chatsRouter } from "../modules/chats";
 import { consoleRouter } from "../modules/console";
+import { agentRouter } from "../modules/agent";
+import { filesRouter } from "../modules/files";
 import { ok } from "../shared/utils/response";
 
 /**
- * MOCK API: every route is backed by in-memory data in `src/modules/*` (no DB).
+ * MOCK API: routes aligned with `frontend/src/api/modules/*` (no DB).
  */
 export const apiRouter = Router();
 
@@ -20,10 +22,12 @@ apiRouter.use("/agents", agentsRouter);
 apiRouter.use("/skills", skillsRouter);
 apiRouter.use("/mcp", mcpRouter);
 apiRouter.use("/models", modelsRouter);
-apiRouter.use("/channels", channelsRouter);
+apiRouter.use("/config", configRouter);
 apiRouter.use("/workspace", workspaceRouter);
 apiRouter.use("/chats", chatsRouter);
 apiRouter.use("/console", consoleRouter);
+apiRouter.use("/agent", agentRouter);
+apiRouter.use("/files", filesRouter);
 
 apiRouter.get("/health", (_req, res) => {
   return ok(res, { status: "ok", service: "backend-modular-mockup", mock: true });

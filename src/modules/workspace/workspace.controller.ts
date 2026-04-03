@@ -1,28 +1,29 @@
-import type { Response } from "express";
-import type { ValidatedRequest } from "../../shared/types/http";
-import { WorkspaceService } from "./workspace.service";
-import { ok } from "../../shared/utils/response";
-import type {
-  ListWorkspaceFilesQuery,
-  WorkspaceFileParams
-} from "./workspace.schemas";
+import type { Request, Response } from "express";
 
-const workspaceService = new WorkspaceService();
-
-export async function listWorkspaceFilesController(
-  req: ValidatedRequest<unknown, ListWorkspaceFilesQuery>,
-  res: Response
-) {
-  const data = await workspaceService.listWorkspaceFiles(req.query.extension);
-  return ok(res, data, {
-    filters: { extension: req.query.extension ?? "all" }
-  });
+/**
+ * MOCK: GET /workspace/download — minimal zip bytes for Workspace page download button.
+ */
+export function downloadWorkspaceController(_req: Request, res: Response) {
+  const zip = Buffer.from([
+    0x50, 0x4b, 0x05, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  ]);
+  const filename = "mock-workspace.zip";
+  res.setHeader("Content-Type", "application/zip");
+  res.setHeader(
+    "Content-Disposition",
+    `attachment; filename="${filename}"`,
+  );
+  res.status(200).send(zip);
 }
 
-export async function getWorkspaceFileController(
-  req: ValidatedRequest<unknown, Record<string, never>, WorkspaceFileParams>,
-  res: Response
-) {
-  const data = await workspaceService.getWorkspaceFile(req.params.filename);
-  return ok(res, data);
+/**
+ * MOCK: POST /workspace/upload — accepts zip from Workspace page; no persistence.
+ */
+export function uploadWorkspaceController(_req: Request, res: Response) {
+  res.status(200).json({
+    success: true,
+    message: "mock upload — data not stored",
+    mock: true,
+  });
 }

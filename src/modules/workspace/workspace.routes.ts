@@ -1,24 +1,21 @@
 import { Router } from "express";
+import multer from "multer";
 import {
-  getWorkspaceFileController,
-  listWorkspaceFilesController
+  downloadWorkspaceController,
+  uploadWorkspaceController,
 } from "./workspace.controller";
-import { asyncHandler } from "../../shared/utils/asyncHandler";
-import { validate } from "../../shared/middleware/validateMiddleware";
-import {
-  listWorkspaceFilesQuerySchema,
-  workspaceFileParamsSchema
-} from "./workspace.schemas";
 
+const upload = multer({ storage: multer.memoryStorage() });
+
+/**
+ * MOCK: only routes the frontend calls under `/workspace` (not `/workspace/files`).
+ * File listing uses `/agent/files` (see `agent` module).
+ */
 export const workspaceRouter = Router();
 
-workspaceRouter.get(
-  "/files",
-  validate({ query: listWorkspaceFilesQuerySchema }),
-  asyncHandler(listWorkspaceFilesController)
-);
-workspaceRouter.get(
-  "/files/:filename",
-  validate({ params: workspaceFileParamsSchema }),
-  asyncHandler(getWorkspaceFileController)
+workspaceRouter.get("/download", downloadWorkspaceController);
+workspaceRouter.post(
+  "/upload",
+  upload.single("file"),
+  uploadWorkspaceController,
 );

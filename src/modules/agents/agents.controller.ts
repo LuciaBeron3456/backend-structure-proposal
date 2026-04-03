@@ -8,20 +8,19 @@ const agentsService = new AgentsService();
 
 export async function listAgentsController(
   req: ValidatedRequest<unknown, ListAgentsQuery>,
-  res: Response
+  res: Response,
 ) {
   const enabled =
     req.query.enabled === undefined ? undefined : req.query.enabled === "true";
   const data = await agentsService.listAgents(enabled);
-  return ok(res, data, {
-    filters: { enabled: enabled ?? "all" }
-  });
+  /** Frontend expects `AgentListResponse`: `{ agents: [...] }`. */
+  return ok(res, { agents: data });
 }
 
 export async function getAgentByIdController(
   req: ValidatedRequest<unknown, Record<string, never>, AgentParams>,
-  res: Response
+  res: Response,
 ) {
-  const data = await agentsService.getAgentById(req.params.id);
+  const data = await agentsService.getAgentProfile(req.params.id);
   return ok(res, data);
 }

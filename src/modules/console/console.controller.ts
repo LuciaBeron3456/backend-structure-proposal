@@ -1,5 +1,7 @@
 import type { Request, Response } from "express";
 import { randomUUID } from "node:crypto";
+import { ok } from "../../shared/utils/response";
+import { agentMockStore, makePreviewFilename } from "../agent/agent.store";
 
 /**
  * MOCK streaming endpoint: no LLM — fixed SSE events only (no DB).
@@ -116,4 +118,22 @@ export async function postConsoleChatController(req: Request, res: Response): Pr
 /** POST /api/console/chat/stop?chat_id=... */
 export async function postConsoleChatStopController(_req: Request, res: Response): Promise<void> {
   res.status(204).end();
+}
+
+type UploadReq = Request & { file?: { buffer: Buffer; originalname: string } };
+
+/** MOCK: POST /console/upload — stores file in memory for `/files/preview/:name`. */
+export function postConsoleUploadController(req: UploadReq, res: Response): void {
+  const file = req.file;
+  if (!file?.buffer) {
+    res.status(400).json({ detail: "No file", mock: true });
+    return;
+  }
+  const stored = makePreviewFilename(file.originalname);
+  agentMockStore.storePreviewBlob(stored, file.buffer);
+  ok(res, {
+    url: stored,
+    file_name: file.originalname,
+    stored_name: stored,
+  });
 }

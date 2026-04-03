@@ -1,11 +1,23 @@
 import type { AgentSummary } from "./agents.types";
 
 /**
- * MOCK DATA: fixed agents only (no DB).
+ * MOCK DATA: fixed agents (no DB). Shape matches frontend `AgentSummary`.
  */
 const mockAgents: AgentSummary[] = [
-  { id: "default", name: "Default Agent", enabled: true },
-  { id: "research", name: "Research Agent", enabled: true },
+  {
+    id: "default",
+    name: "Default Agent",
+    description: "Mock default agent",
+    workspace_dir: "~/.copaw/workspaces/default",
+    enabled: true,
+  },
+  {
+    id: "research",
+    name: "Research Agent",
+    description: "Mock research agent",
+    workspace_dir: "~/.copaw/workspaces/research",
+    enabled: true,
+  },
 ];
 
 export class AgentsRepository {

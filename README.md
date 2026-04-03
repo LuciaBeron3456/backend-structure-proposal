@@ -1,65 +1,69 @@
 # Backend Modular Mockup
 
-This server is a **mock API** for local development. **All responses use in-memory fake data** — there is no database connection and nothing is persisted across restarts (except what you hold in memory during a single process).
+Mock HTTP API for local development. Responses use **in-memory data only** — no database, and nothing survives a server restart.
 
 ## Quick start
-
-From this directory:
 
 ```bash
 npm install
 npm run dev
 ```
 
-The HTTP server listens on **port 8090** by default (see `src/config/env.ts`: `PORT` defaults to `8090`).
+Default listen port is **8090** (`src/config/env.ts`).
 
-### Set the port explicitly (8090)
+### Port and CORS
 
-Create a `.env` file next to `package.json` (you can copy `.env.example`):
-
-```bash
-cp .env.example .env
-```
-
-Ensure it contains:
+Copy `.env.example` to `.env` or set:
 
 ```env
 PORT=8090
 FRONTEND_URL=http://localhost:5173
 ```
 
-Or start with an environment variable:
+Or: `PORT=8090 npm run dev`
 
-```bash
-PORT=8090 npm run dev
-```
+### Mentonex frontend
 
-### Point the Mentonex frontend at this API
-
-The Vite app calls `VITE_API_BASE_URL` + `/api/...`. In the **frontend** repo, set (for example in `frontend/.env` or `frontend/.env.local`):
+Point the Vite app at this server (`/api` is prefixed automatically):
 
 ```env
 VITE_API_BASE_URL=http://localhost:8090
 ```
 
-Restart the Vite dev server after changing env vars.
+Restart Vite after changing env vars.
 
-Health check: `GET http://localhost:8090/api/health` — the JSON includes `mock: true`.
+Health: `GET http://localhost:8090/api/health` — response includes `mock: true`.
 
-## Architecture notes
+## Layout
 
-- **Middlewares** (`src/shared/middleware`): validation (Zod), request logging, 404, error handling.
-- **Modules** (`src/modules/*`): each feature exposes routes → controller → service → **in-memory** repository (see comments marked `MOCK` in repository and service files).
-- **`src/infrastructure/db/client.ts`**: stub only; real Prisma usage is not active in this mock mode.
+- **`src/main.ts`** — process entry, `env.PORT`, `createApp()`.
+- **`src/app.ts`** — Express: security middleware, JSON body, `/api` router, not-found and error handlers.
+- **`src/api/router.ts`** — mounts feature routers under `/api`.
+- **`src/shared/`** — middleware (validation, logging, errors), `asyncHandler`, `ok()` response helper.
+- **`src/modules/*`** — feature modules (routes → controllers → services → in-memory stores where applicable).
+- **`src/infrastructure/db/client.ts`** — unused stub (no Prisma at runtime).
 
-For a deeper tour of the models module layout (routes, schemas, controller, service, types), see the older sections below if still useful; treat the **database layer** description as superseded by the mock-only note above.
+### API surface (prefix `/api`)
 
-## Models module layout (reference)
+| Prefix | Role |
+|--------|------|
+| `/auth` | Login, status, verify, register, update-profile |
+| `/agents` | Agent list (`{ agents: [...] }`) and agent profile |
+| `/agent` | Workspace APIs: `/agent/files`, `/agent/memory`, `/agent/system-prompt-files` |
+| `/workspace` | `GET /download`, `POST /upload` (zip) |
+| `/config` | Channels, heartbeat, user-timezone, security stub |
+| `/chats` | Sessions: list, history, CRUD, batch-delete |
+| `/console` | Streaming chat, stop, attachment upload |
+| `/files` | `GET /preview/:filename` for attachment previews |
+| `/models` | Providers and active LLM |
+| `/skills`, `/mcp` | Skills and MCP list/detail |
+| `/health`, `/version` | Health and version string |
 
-- `index.ts` — public router export.
-- `models.routes.ts` — HTTP routes and middleware chain.
-- `models.schemas.ts` — Zod request schemas.
-- `models.controller.ts` — HTTP layer.
-- `models.service.ts` — business rules; provider/active LLM state is in-memory.
-- `models.repository.ts` — legacy `ModelSummary` mock rows (no DB).
-- `models.types.ts` — TypeScript types.
+### Models module (files)
+
+- `models.routes.ts` — routes.
+- `models.schemas.ts` — Zod inputs.
+- `models.controller.ts` — HTTP handlers.
+- `models.service.ts` — provider/active LLM state (in-memory).
+- `models.repository.ts` — legacy `ModelSummary` rows for `GET /models/:id`.
+- `models.types.ts` — types.
