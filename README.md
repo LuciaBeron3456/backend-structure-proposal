@@ -3,31 +3,6 @@
 This folder is a practical mockup of a modular backend structure.  
 It is intentionally lightweight, but it already shows the patterns we want to keep: module boundaries, validated inputs, consistent API responses, and centralized middleware/logging.
 
-## `main.ts` and `app.ts`
-
-`src/main.ts` is the process entrypoint. It loads environment variables, builds the app, and starts the HTTP server.
-
-`src/app.ts` is where Express is assembled. It wires security and transport middleware (`helmet`, `cors`, `morgan`), request parsing, request logging, the `/api` router, and finally not-found and error middleware.  
-Keeping this file focused makes startup behavior easy to reason about.
-
-## Shared utils (quick summary)
-
-Inside `src/shared/utils`:
-
-- `asyncHandler.ts`: wraps async controllers so thrown/rejected errors always reach the error middleware.
-- `response.ts`: standard response helpers (`ok`, `created`, `fail`) so all endpoints follow one response shape.
-
-These utilities are there to remove repeated boilerplate and keep behavior consistent across modules.
-
-## Shared types (quick summary)
-
-Inside `src/shared/types`:
-
-- `http.ts`: typed request helper (`ValidatedRequest`) used after schema validation.
-- `apiResponse.ts`: shared response envelope types for success and error payloads.
-
-This gives us stronger type safety without coupling each module to custom local request/response shapes.
-
 ## Middlewares
 
 Inside `src/shared/middleware`:
